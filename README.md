@@ -1,157 +1,93 @@
-# AgroWeb - Smart Farming Marketplace
+<div align="center">
+  
+  <img src="public/hero-bg.png" alt="AgroWeb Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
 
-A comprehensive frontend application for connecting farmers and buyers directly, featuring smart farming tools and a marketplace for fresh produce.
+  # 🌱 AgroWeb
+  **India's First Farm-to-Market Intelligence Platform**
 
-## Features
+  [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+  [![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![SIH Hackathon](https://img.shields.io/badge/SIH-Hackathon_Ready-059669?style=for-the-badge)](https://sih.gov.in/)
 
-### For Farmers
-- **Smart Dashboard**: Overview of farm performance, orders, and analytics
-- **Crop Recommendations**: AI-powered suggestions based on soil type, region, and weather
-- **Pest Detection**: Upload crop images to identify pests and diseases with treatment recommendations
-- **Weather Forecasts**: Accurate weather predictions with farming tips
-- **Product Management**: Add, edit, and manage product listings
-- **Order Management**: Track and manage customer orders
-- **Farm Profile**: Detailed farm information and certifications
+</div>
 
-### For Buyers
-- **Marketplace**: Browse fresh produce directly from farmers
-- **Advanced Filters**: Filter by category, region, price, and more
-- **Shopping Cart**: Add products and manage quantities
-- **Order Tracking**: Track order status and delivery updates
-- **Order History**: View past orders and reorder favorites
-- **Farmer Profiles**: Learn about farmers and their practices
+<br />
 
-### Common Features
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
-- **User Authentication**: Secure login and registration with role-based access
-- **Real-time Notifications**: Stay updated with order status and marketplace alerts
-- **Settings Management**: Customize profile, notifications, and preferences
-- **Search & Discovery**: Find products and farmers easily
+## 💡 The Problem
+In the traditional agricultural supply chain, Indian farmers lose up to **40-50% of their potential profit** to middlemen, commission agents, and cold-storage losses. On the flip side, consumers pay high retail markups for produce that is days old by the time it reaches supermarkets. Furthermore, farmers lack real-time, actionable intelligence to combat pests and unpredictable weather.
 
-## Technology Stack
+## 🚀 The Solution: AgroWeb
+AgroWeb is not just another e-commerce clone. It is a dual-engine platform combining **AI-driven agricultural intelligence** with a **zero-commission direct marketplace**. 
 
-- **Frontend**: React.js 18
-- **Styling**: Tailwind CSS
-- **Routing**: React Router DOM
-- **State Management**: React Context API
-- **Icons**: Lucide React (via SVG)
-- **Build Tool**: Create React App
+We empower farmers to grow smarter crops using AI, and then give them the digital infrastructure to sell that harvest directly to consumers and businesses.
 
-## Getting Started
-
-### Prerequisites
-- Node.js (version 14 or higher)
-- npm or yarn package manager
-
-### Installation
-
-1. **Download and Extract**
-   - Download the project zip file from v0
-   - Extract to your desired directory
-
-2. **Install Dependencies**
-   \`\`\`bash
-   cd agroweb-frontend
-   npm install
-   \`\`\`
-
-3. **Start Development Server**
-   \`\`\`bash
-   npm start
-   \`\`\`
-   The application will open in your browser at `http://localhost:3000`
-
-### Demo Accounts
-
-For testing purposes, you can use these demo login credentials:
-
-**Farmer Account:**
-- Email: `farmer@demo.com`
-- Password: `demo123`
-
-**Buyer Account:**
-- Email: `buyer@demo.com`
-- Password: `demo123`
-
-Or use the quick demo login buttons on the login page.
-
-## Key Features Implementation
-
-### Authentication System
-- Role-based authentication (Farmer/Buyer)
-- Protected routes based on user roles
-- Persistent login state with localStorage
-- Demo accounts for easy testing
-
-### Smart Farming Tools
-- **Crop Recommendation Engine**: Form-based input for soil, region, season, and water availability
-- **Pest Detection**: Image upload with simulated AI analysis
-- **Weather Integration**: Mock weather API with 3-day forecasts and farming tips
-
-### Marketplace Features
-- **Product Catalog**: Grid layout with filtering and sorting
-- **Shopping Cart**: Add/remove items, quantity management
-- **Order Management**: Status tracking for both farmers and buyers
-- **Product Details**: Comprehensive product information with reviews
-
-### Responsive Design
-- Mobile-first approach
-- Tailwind CSS for consistent styling
-- Responsive navigation with mobile menu
-- Optimized layouts for all screen sizes
-
-## Customization
-
-### Styling
-The application uses Tailwind CSS for styling. You can customize:
-- Colors in `tailwind.config.js`
-- Component styles in `src/index.css`
-- Individual component styling using Tailwind classes
-
-### Mock Data
-Mock data is used for demonstration. Replace with real API calls:
-- Product data in components and pages
-- User authentication in `AuthContext`
-- Order management in respective components
-
-### API Integration
-To connect with a real backend:
-1. Replace mock data with API calls
-2. Update authentication context with real endpoints
-3. Implement proper error handling
-4. Add loading states for API requests
-
-## Available Scripts
-
-- `npm start` - Runs the development server
-- `npm build` - Builds the app for production
-- `npm test` - Launches the test runner
-- `npm eject` - Ejects from Create React App (one-way operation)
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-
-## Support
-
-For support and questions:
-- Check the documentation
-- Review the code comments
-- Test with the provided demo accounts
-- Ensure all dependencies are properly installed
+### 🌟 Why AgroWeb is Different
+Most AgTech platforms do one of two things: they either give weather advice OR they act as a marketplace. **AgroWeb does both, seamlessly.**
+- **Farmer-First Economics:** By eliminating the mandi (wholesale market) intermediaries, farmers increase their profit margins significantly while buyers pay less.
+- **AgroScan AI Built-In:** We don't expect farmers to know every disease. They just upload a photo of a sick crop, and our AI diagnoses it and suggests organic & chemical treatments.
+- **Predictive Yield & Pricing:** The AI Crop Advisor analyzes local soil, season, and water data to recommend the most profitable crops to plant, cross-referencing with live MSP (Minimum Support Price) data.
 
 ---
 
-**AgroWeb** - Connecting farmers and buyers for a sustainable future! 🌱
+## ✨ Core Features
+
+### 👨‍🌾 For Farmers
+* **AgroScan Pest Detection:** Upload photos of infected leaves for instant AI diagnosis and step-by-step treatment plans.
+* **AI Crop Advisor:** ML-based recommendations on what to plant next based on hyper-local parameters.
+* **Hyper-Local Weather:** 5-day forecasts tailored specifically to farm coordinates, including soil moisture and UV index.
+* **Smart Dashboard:** Track active listings, monthly revenue, pending orders, and logistics—all from a mobile-first interface.
+
+### 🛒 For Buyers
+* **Direct Sourcing:** Buy authentic, premium, and GI-tagged produce (e.g., Alphonso Mangoes, Guntur Chilli) straight from the source.
+* **Farm Traceability:** Know exactly which farm your food came from and read real farmer profiles and reviews.
+* **Wholesale or Retail:** Buy 1kg for your kitchen or 100kg for your restaurant.
+
+---
+
+## 💻 Tech Stack
+- **Frontend Framework:** React (Vite)
+- **Styling:** Tailwind CSS (Custom glassmorphism UI, fluid animations)
+- **Icons & Assets:** Lucide React, Unsplash (Curated high-res imagery)
+- **Routing:** React Router v6
+- **State Management:** React Context API
+
+---
+
+## 🛠️ Local Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Mr-spiky/agroweb.git
+   cd agroweb
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+   Open `http://localhost:3000` to view it in your browser.
+
+---
+
+## 🔑 Demo Access
+You can test the application without registering using the built-in demo accounts:
+
+**Farmer Demo:**
+* Email: `farmer@demo.com`
+* Password: `demo123`
+
+**Buyer Demo:**
+* Email: `buyer@demo.com`
+* Password: `demo123`
+
+---
+
+<div align="center">
+  <i>Built with ❤️ for the SIH Hackathon. Empowering the hands that feed the nation.</i>
+</div>
