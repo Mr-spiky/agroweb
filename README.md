@@ -8,7 +8,7 @@
   [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
   [![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-  [![SIH Hackathon](https://img.shields.io/badge/SIH-Hackathon_Ready-059669?style=for-the-badge)](https://sih.gov.in/)
+  [![HackNite](https://img.shields.io/badge/HackNite-Ready-059669?style=for-the-badge)](#)
 
 </div>
 
@@ -89,5 +89,5 @@ You can test the application without registering using the built-in demo account
 ---
 
 <div align="center">
-  <i>Built with ❤️ for the SIH Hackathon. Empowering the hands that feed the nation.</i>
+  <i>Built with ❤️ for HackNite. Empowering the hands that feed the nation.</i>
 </div>
