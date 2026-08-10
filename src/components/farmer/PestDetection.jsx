@@ -1,50 +1,87 @@
 "use client"
 
 import { useState } from "react"
-import LoadingSpinner from "../common/LoadingSpinner"
+import { getPestDetectionResult } from "../../utils/mockData"
+
+const SeverityBadge = ({ level }) => {
+  const styles = {
+    High:   "bg-red-100 text-red-700 border-red-200",
+    Medium: "bg-amber-100 text-amber-700 border-amber-200",
+    Low:    "bg-green-100 text-green-700 border-green-200",
+  }
+  const icons = { High: "🔴", Medium: "🟡", Low: "🟢" }
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${styles[level]}`}>
+      {icons[level]} {level} Severity
+    </span>
+  )
+}
 
 const PestDetection = () => {
   const [selectedFile, setSelectedFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
+  const [scanProgress, setScanProgress] = useState(0)
+  const [activeTab, setActiveTab] = useState({}) // { pestId: "organic" | "chemical" }
+
+  const scanSteps = [
+    "Preprocessing image...",
+    "Detecting crop boundaries...",
+    "Running CNN model (AgroScan v2.1)...",
+    "Matching pest signatures...",
+    "Generating treatment report...",
+  ]
+  const [scanStep, setScanStep] = useState(0)
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0]
     if (file) {
       setSelectedFile(file)
       const reader = new FileReader()
-      reader.onload = (e) => setPreview(e.target.result)
+      reader.onload = (ev) => setPreview(ev.target.result)
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (file && file.type.startsWith("image/")) {
+      setSelectedFile(file)
+      const reader = new FileReader()
+      reader.onload = (ev) => setPreview(ev.target.result)
       reader.readAsDataURL(file)
     }
   }
 
   const handleAnalyze = () => {
     if (!selectedFile) return
-
     setLoading(true)
+    setScanProgress(0)
+    setScanStep(0)
 
-    // Simulate API call for pest detection
+    // Animate progress bar
+    let progress = 0
+    let step = 0
+    const interval = setInterval(() => {
+      progress += 4
+      step = Math.floor((progress / 100) * scanSteps.length)
+      setScanProgress(Math.min(progress, 98))
+      setScanStep(Math.min(step, scanSteps.length - 1))
+      if (progress >= 95) clearInterval(interval)
+    }, 100)
+
     setTimeout(() => {
-      const mockResults = [
-        {
-          pest: "Aphids",
-          confidence: 92,
-          severity: "Medium",
-          treatment: "Apply neem oil spray every 3 days",
-          description: "Small green insects found on leaves",
-        },
-        {
-          pest: "Leaf Spot Disease",
-          confidence: 78,
-          severity: "Low",
-          treatment: "Remove affected leaves and apply fungicide",
-          description: "Brown spots on leaf surface",
-        },
-      ]
-
-      setResult(mockResults)
+      clearInterval(interval)
+      setScanProgress(100)
+      const detections = getPestDetectionResult()
+      setResult(detections)
       setLoading(false)
+      // Default active tab for each result
+      const tabs = {}
+      detections.forEach((d, i) => { tabs[i] = "organic" })
+      setActiveTab(tabs)
     }, 3000)
   }
 
@@ -52,121 +89,219 @@ const PestDetection = () => {
     setSelectedFile(null)
     setPreview(null)
     setResult(null)
+    setScanProgress(0)
+    setScanStep(0)
+    setActiveTab({})
   }
 
   return (
-    <div className="card p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Pest Detection</h3>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-xl">🔬</div>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Pest & Disease Detection</h3>
+          <p className="text-xs text-gray-400">AgroScan Vision v2.1 · 8 Disease Classes</p>
+        </div>
+      </div>
 
       <div className="space-y-4">
-        <div>
-          <label className="form-label">Upload Plant Image</label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-            <div className="space-y-1 text-center">
-              {preview ? (
-                <div className="relative">
-                  <img
-                    src={preview || "/placeholder.svg"}
-                    alt="Preview"
-                    className="mx-auto h-32 w-32 object-cover rounded-md"
-                  />
+        {/* Upload zone */}
+        {!result && (
+          <div
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+            className={`border-2 border-dashed rounded-2xl transition-all duration-200 ${
+              preview ? "border-emerald-300 bg-emerald-50" : "border-gray-300 bg-gray-50 hover:border-emerald-400 hover:bg-emerald-50"
+            }`}
+          >
+            {preview ? (
+              <div className="relative p-4 flex flex-col items-center">
+                <img
+                  src={preview}
+                  alt="Crop preview"
+                  className="max-h-44 rounded-xl object-cover shadow-md"
+                />
+                <p className="mt-3 text-sm text-gray-600 font-medium">{selectedFile?.name}</p>
+                {/* Scan overlay when loading */}
+                {loading && (
+                  <div className="mt-3 w-full">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      <span className="text-xs text-amber-700 font-medium">
+                        {scanSteps[scanStep]}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-200"
+                        style={{ width: `${scanProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1 text-right">{scanProgress}%</p>
+                  </div>
+                )}
+                {!loading && (
                   <button
                     onClick={handleReset}
-                    className="absolute top-0 right-0 -mt-2 -mr-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                    className="mt-3 text-xs text-red-500 hover:text-red-700 font-medium"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    ✕ Remove image
                   </button>
-                </div>
-              ) : (
-                <>
-                  <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div className="flex text-sm text-gray-600">
-                    <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500"
-                    >
-                      <span>Upload a file</span>
-                      <input
-                        id="file-upload"
-                        name="file-upload"
-                        type="file"
-                        className="sr-only"
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                </>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              <label htmlFor="pest-file-upload" className="flex flex-col items-center justify-center p-8 cursor-pointer">
+                <div className="text-5xl mb-3">📷</div>
+                <p className="text-sm font-semibold text-gray-700">Drop a crop image here</p>
+                <p className="text-xs text-gray-400 mt-1">or click to browse · PNG, JPG up to 10 MB</p>
+                <input
+                  id="pest-file-upload"
+                  type="file"
+                  className="sr-only"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                />
+              </label>
+            )}
           </div>
-        </div>
+        )}
 
-        {selectedFile && !result && (
-          <button onClick={handleAnalyze} disabled={loading} className="btn btn-primary w-full">
-            {loading ? <LoadingSpinner size="sm" /> : "Analyze Image"}
+        {/* Analyse button */}
+        {selectedFile && !result && !loading && (
+          <button
+            onClick={handleAnalyze}
+            className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-md hover:shadow-amber-200"
+          >
+            🔬 Analyse with AgroScan AI
           </button>
         )}
 
+        {loading && (
+          <button disabled className="w-full py-3 bg-amber-400 text-white font-semibold rounded-xl opacity-70 cursor-not-allowed">
+            Scanning... {scanProgress}%
+          </button>
+        )}
+
+        {/* Results */}
         {result && (
-          <div className="mt-6">
-            <h4 className="text-md font-medium text-gray-900 mb-3">Detection Results:</h4>
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h4 className="font-semibold text-gray-900">
+                  🔍 {result.length} Issue{result.length > 1 ? "s" : ""} Detected
+                </h4>
+                <p className="text-xs text-gray-400 mt-0.5">AgroScan AI · Confidence-ranked results</p>
+              </div>
+              <button
+                onClick={handleReset}
+                className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+              >
+                ← Scan Another
+              </button>
+            </div>
+
             <div className="space-y-4">
               {result.map((detection, index) => (
-                <div key={index} className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h5 className="font-medium text-yellow-900">{detection.pest}</h5>
-                      <p className="text-sm text-yellow-700 mt-1">{detection.description}</p>
-                      <div className="mt-2 flex items-center space-x-4 text-sm">
-                        <span className="text-yellow-700">Confidence: {detection.confidence}%</span>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            detection.severity === "High"
-                              ? "bg-red-100 text-red-800"
-                              : detection.severity === "Medium"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-green-100 text-green-800"
-                          }`}
-                        >
-                          {detection.severity} Severity
-                        </span>
-                      </div>
-                      <div className="mt-3 p-3 bg-white rounded border">
-                        <h6 className="font-medium text-gray-900">Recommended Treatment:</h6>
-                        <p className="text-sm text-gray-700 mt-1">{detection.treatment}</p>
+                <div
+                  key={index}
+                  className={`border rounded-2xl p-4 ${
+                    index === 0 && detection.severity === "High"
+                      ? "border-red-200 bg-red-50"
+                      : index === 0
+                      ? "border-amber-200 bg-amber-50"
+                      : "border-gray-100 bg-gray-50"
+                  }`}
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{detection.emoji}</span>
+                        <div>
+                          <h5 className="font-bold text-gray-900 text-sm">{detection.pest}</h5>
+                          <p className="text-xs text-gray-500">{detection.description}</p>
+                        </div>
                       </div>
                     </div>
+                    <SeverityBadge level={detection.severity} />
+                  </div>
+
+                  {/* Confidence bar */}
+                  <div className="mb-3">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span>Detection Confidence</span>
+                      <span className="font-bold text-amber-600">{detection.confidence}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full"
+                        style={{ width: `${detection.confidence}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Meta info */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                      📉 Crop loss: {detection.cropLoss}
+                    </span>
+                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
+                      ⚠️ {detection.urgency}
+                    </span>
+                  </div>
+
+                  {/* Symptoms */}
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Symptoms Observed</p>
+                    <ul className="space-y-1">
+                      {detection.symptoms.map((s, i) => (
+                        <li key={i} className="text-xs text-gray-600 flex items-start gap-1.5">
+                          <span className="text-amber-500 mt-0.5">•</span> {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Treatment tabs */}
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Treatment Plan</p>
+                    <div className="flex gap-2 mb-3">
+                      {["organic", "chemical"].map((tab) => (
+                        <button
+                          key={tab}
+                          onClick={() => setActiveTab((prev) => ({ ...prev, [index]: tab }))}
+                          className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                            (activeTab[index] || "organic") === tab
+                              ? tab === "organic"
+                                ? "bg-emerald-500 text-white"
+                                : "bg-blue-500 text-white"
+                              : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                          }`}
+                        >
+                          {tab === "organic" ? "🌿 Organic" : "🧪 Chemical"}
+                        </button>
+                      ))}
+                    </div>
+                    <ul className="space-y-1.5">
+                      {((activeTab[index] || "organic") === "organic"
+                        ? detection.organicTreatment
+                        : detection.chemicalTreatment
+                      ).map((step, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs text-gray-700 bg-white rounded-lg p-2 border border-gray-100">
+                          <span className="font-bold text-gray-400 w-4 flex-shrink-0">{i + 1}.</span>
+                          {step}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               ))}
             </div>
-            <button onClick={handleReset} className="mt-4 btn btn-outline w-full">
-              Analyze Another Image
-            </button>
+
+            <p className="mt-4 text-xs text-gray-400 text-center">
+              Results are AI-generated. Consult your local Krishi Vigyan Kendra for confirmation.
+            </p>
           </div>
         )}
       </div>

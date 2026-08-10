@@ -1,163 +1,170 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import LoadingSpinner from "../common/LoadingSpinner"
+import { mockWeatherData } from "../../utils/mockData"
+
+const cities = Object.keys(mockWeatherData)
 
 const WeatherForecast = () => {
+  const [selectedCity, setSelectedCity] = useState("Bangalore")
   const [weather, setWeather] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [activeTip, setActiveTip] = useState(0)
 
   useEffect(() => {
-    // Simulate API call to weather service
-    setTimeout(() => {
-      const mockWeatherData = {
-        current: {
-          temperature: 28,
-          condition: "Partly Cloudy",
-          humidity: 65,
-          windSpeed: 12,
-          icon: "⛅",
-        },
-        forecast: [
-          {
-            day: "Today",
-            high: 32,
-            low: 22,
-            condition: "Sunny",
-            icon: "☀️",
-            precipitation: 0,
-          },
-          {
-            day: "Tomorrow",
-            high: 29,
-            low: 20,
-            condition: "Partly Cloudy",
-            icon: "⛅",
-            precipitation: 10,
-          },
-          {
-            day: "Day 3",
-            high: 26,
-            low: 18,
-            condition: "Rainy",
-            icon: "🌧️",
-            precipitation: 80,
-          },
-        ],
-      }
-
-      setWeather(mockWeatherData)
+    setLoading(true)
+    // Simulate brief fetch delay
+    const t = setTimeout(() => {
+      setWeather(mockWeatherData[selectedCity])
       setLoading(false)
-    }, 1500)
-  }, [])
+      setActiveTip(0)
+    }, 600)
+    return () => clearTimeout(t)
+  }, [selectedCity])
 
-  if (loading) {
-    return (
-      <div className="card p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Weather Forecast</h3>
-        <LoadingSpinner />
-      </div>
-    )
+  // Rotate through forecast tips
+  useEffect(() => {
+    if (!weather) return
+    const interval = setInterval(() => {
+      setActiveTip((prev) => (prev + 1) % weather.forecast.length)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [weather])
+
+  const getSoilMoistureColor = (text) => {
+    if (text.includes("Very Low")) return "text-red-600"
+    if (text.includes("Low")) return "text-amber-600"
+    if (text.includes("Moderate")) return "text-blue-600"
+    if (text.includes("High")) return "text-emerald-600"
+    return "text-gray-600"
+  }
+
+  const getUVLabel = (uv) => {
+    if (uv <= 2) return { label: "Low", color: "text-green-600" }
+    if (uv <= 5) return { label: "Moderate", color: "text-amber-500" }
+    if (uv <= 7) return { label: "High", color: "text-orange-500" }
+    return { label: "Very High", color: "text-red-600" }
   }
 
   return (
-    <div className="card p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Weather Forecast</h3>
-
-      {/* Current Weather */}
-      <div className="bg-blue-50 rounded-lg p-4 mb-4">
-        <div className="flex items-center justify-between">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl">🌦️</div>
           <div>
-            <h4 className="text-lg font-medium text-blue-900">Current Weather</h4>
-            <p className="text-3xl font-bold text-blue-900">{weather.current.temperature}°C</p>
-            <p className="text-blue-700">{weather.current.condition}</p>
-          </div>
-          <div className="text-4xl">{weather.current.icon}</div>
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-blue-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
-              />
-            </svg>
-            <span className="text-blue-700">Humidity: {weather.current.humidity}%</span>
-          </div>
-          <div className="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 text-blue-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2"
-              />
-            </svg>
-            <span className="text-blue-700">Wind: {weather.current.windSpeed} km/h</span>
+            <h3 className="text-lg font-semibold text-gray-900">Weather Forecast</h3>
+            <p className="text-xs text-gray-400">Hyper-local farming advisory</p>
           </div>
         </div>
+        {/* City Selector */}
+        <select
+          value={selectedCity}
+          onChange={(e) => setSelectedCity(e.target.value)}
+          className="text-sm border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
+        >
+          {cities.map((city) => (
+            <option key={city} value={city}>{city}</option>
+          ))}
+        </select>
       </div>
 
-      {/* 3-Day Forecast */}
-      <div>
-        <h4 className="text-md font-medium text-gray-900 mb-3">3-Day Forecast</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {weather.forecast.map((day, index) => (
-            <div key={index} className="bg-gray-50 rounded-lg p-4">
-              <div className="text-center">
-                <h5 className="font-medium text-gray-900">{day.day}</h5>
-                <div className="text-2xl my-2">{day.icon}</div>
-                <p className="text-sm text-gray-600">{day.condition}</p>
-                <div className="mt-2">
-                  <span className="text-lg font-semibold text-gray-900">{day.high}°</span>
-                  <span className="text-sm text-gray-500 ml-1">{day.low}°</span>
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-12 space-y-3">
+          <div className="text-4xl animate-bounce">🌤️</div>
+          <p className="text-sm text-gray-400">Loading weather for {selectedCity}...</p>
+        </div>
+      ) : weather ? (
+        <>
+          {/* Current Conditions */}
+          <div className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl p-5 text-white mb-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-blue-100 text-sm font-medium">{selectedCity} · {weather.region} India</p>
+                <div className="mt-1 flex items-baseline gap-2">
+                  <span className="text-5xl font-extrabold">{weather.current.temperature}°</span>
+                  <span className="text-blue-200 text-sm">Feels {weather.current.feelsLike}°C</span>
                 </div>
-                <div className="mt-2 flex items-center justify-center text-xs text-gray-500">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-3 w-3 mr-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-                    />
-                  </svg>
-                  {day.precipitation}% rain
+                <p className="text-blue-100 mt-1">{weather.current.condition}</p>
+              </div>
+              <div className="text-6xl">{weather.current.icon}</div>
+            </div>
+
+            {/* Metrics */}
+            <div className="mt-4 grid grid-cols-4 gap-3">
+              {[
+                { label: "Humidity", value: `${weather.current.humidity}%`, icon: "💧" },
+                { label: "Wind", value: `${weather.current.windSpeed} km/h`, icon: "🌬️" },
+                { label: "UV Index", value: `${weather.current.uvIndex} – ${getUVLabel(weather.current.uvIndex).label}`, icon: "☀️" },
+                { label: "Soil", value: weather.current.soilMoisture, icon: "🌱" },
+              ].map((m) => (
+                <div key={m.label} className="bg-white/10 rounded-xl p-2 text-center">
+                  <div className="text-lg mb-0.5">{m.icon}</div>
+                  <p className="text-xs text-blue-100">{m.label}</p>
+                  <p className="text-xs font-bold text-white leading-tight">{m.value}</p>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Weather Alerts */}
+          {weather.alerts && weather.alerts.length > 0 && (
+            <div className="mb-4">
+              {weather.alerts.map((alert, i) => (
+                <div key={i} className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-3">
+                  <span className="text-lg flex-shrink-0">⚠️</span>
+                  <p className="text-sm text-red-700 font-medium">{alert.message}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 5-Day Forecast */}
+          <div className="mb-5">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">5-Day Forecast</h4>
+            <div className="grid grid-cols-5 gap-2">
+              {weather.forecast.map((day, index) => (
+                <div
+                  key={index}
+                  className={`rounded-xl p-2.5 text-center transition-all duration-200 cursor-default ${
+                    index === activeTip
+                      ? "bg-blue-50 border-2 border-blue-300 shadow-sm"
+                      : "bg-gray-50 border border-gray-100 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setActiveTip(index)}
+                >
+                  <p className="text-xs font-semibold text-gray-600">{day.day}</p>
+                  <div className="text-2xl my-1.5">{day.icon}</div>
+                  <p className="text-xs text-gray-500 leading-tight">{day.condition}</p>
+                  <div className="mt-1.5">
+                    <span className="text-sm font-bold text-gray-900">{day.high}°</span>
+                    <span className="text-xs text-gray-400 ml-1">{day.low}°</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-center gap-0.5 text-xs text-blue-500">
+                    <span>💧</span>
+                    <span>{day.precipitation}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Farming Tip for active day */}
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+            <div className="flex items-start gap-2">
+              <span className="text-xl flex-shrink-0">🌾</span>
+              <div>
+                <p className="text-xs font-bold text-emerald-800 uppercase tracking-wide mb-1">
+                  Farming Tip · {weather.forecast[activeTip]?.day}
+                </p>
+                <p className="text-sm text-emerald-700 font-medium">
+                  {weather.forecast[activeTip]?.farmingTip}
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Farming Tips */}
-      <div className="mt-6 bg-green-50 rounded-lg p-4">
-        <h4 className="text-md font-medium text-green-900 mb-2">Farming Tips</h4>
-        <ul className="text-sm text-green-700 space-y-1">
-          <li>• Good weather for outdoor activities today</li>
-          <li>• Consider watering crops before the rain on Day 3</li>
-          <li>• Monitor humidity levels for pest prevention</li>
-        </ul>
-      </div>
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

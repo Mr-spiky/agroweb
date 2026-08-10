@@ -9,6 +9,7 @@ const ProductFilters = ({ onFilterChange, categories, regions }) => {
     minPrice: "",
     maxPrice: "",
     sortBy: "newest",
+    organic: false,
   })
 
   const handleChange = (e) => {
@@ -25,6 +26,7 @@ const ProductFilters = ({ onFilterChange, categories, regions }) => {
       minPrice: "",
       maxPrice: "",
       sortBy: "newest",
+      organic: false,
     }
     setFilters(resetFilters)
     onFilterChange(resetFilters)
@@ -78,7 +80,7 @@ const ProductFilters = ({ onFilterChange, categories, regions }) => {
             </label>
             <div className="mt-1 relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm">$</span>
+                <span className="text-gray-500 sm:text-sm">₹</span>
               </div>
               <input
                 type="number"
@@ -97,7 +99,7 @@ const ProductFilters = ({ onFilterChange, categories, regions }) => {
             </label>
             <div className="mt-1 relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm">$</span>
+                <span className="text-gray-500 sm:text-sm">₹</span>
               </div>
               <input
                 type="number"

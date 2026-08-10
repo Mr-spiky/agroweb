@@ -30,10 +30,10 @@ export const AuthProvider = ({ children }) => {
           const isFarmer = email.includes("farmer")
           const user = {
             id: Math.random().toString(36).substr(2, 9),
-            name: isFarmer ? "Aman Farmer" : "Aman Buyer",
+            name: isFarmer ? "Rajesh Patel" : "Amit Kumar",
             email,
             role: isFarmer ? "farmer" : "buyer",
-            avatar: `https://ui-avatars.com/api/?name=${isFarmer ? "Aman+Farmer" : "Aman+Buyer"}&background=random`,
+            avatar: `https://ui-avatars.com/api/?name=${isFarmer ? "Rajesh+Patel" : "Amit+Kumar"}&background=059669&color=fff`,
           }
 
           setCurrentUser(user)

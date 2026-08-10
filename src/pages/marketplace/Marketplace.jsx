@@ -6,179 +6,78 @@ import PageHeader from "../../components/common/PageHeader"
 import ProductCard from "../../components/marketplace/ProductCard"
 import ProductFilters from "../../components/marketplace/ProductFilters"
 import LoadingSpinner from "../../components/common/LoadingSpinner"
-import { useAuth } from "../../context/AuthContext"
+import { mockProducts } from "../../utils/mockData"
 
 const Marketplace = () => {
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const { currentUser } = useAuth()
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    // Simulate API call to fetch products
+    // Simulate short loading delay
     setTimeout(() => {
-      const mockProducts = [
-        {
-          id: 1,
-          name: "Organic Tomatoes",
-          category: "Vegetables",
-          price: 5.99,
-          quantity: 50,
-          location: "Green Valley",
-          image: "/placeholder.svg?height=200&width=200",
-          farmerName: "John Farmer",
-          farmerAvatar: "/placeholder.svg?height=40&width=40",
-          rating: 4.8,
-          dateAdded: "2024-01-15",
-        },
-        {
-          id: 2,
-          name: "Fresh Carrots",
-          category: "Vegetables",
-          price: 3.49,
-          quantity: 30,
-          location: "Sunny Hills",
-          image: "/placeholder.svg?height=200&width=200",
-          farmerName: "Sarah Green",
-          farmerAvatar: "/placeholder.svg?height=40&width=40",
-          rating: 4.5,
-          dateAdded: "2024-01-14",
-        },
-        {
-          id: 3,
-          name: "Green Lettuce",
-          category: "Vegetables",
-          price: 2.99,
-          quantity: 20,
-          location: "River Valley",
-          image: "/placeholder.svg?height=200&width=200",
-          farmerName: "Mike Wilson",
-          farmerAvatar: "/placeholder.svg?height=40&width=40",
-          rating: 4.7,
-          dateAdded: "2024-01-13",
-        },
-        {
-          id: 4,
-          name: "Red Apples",
-          category: "Fruits",
-          price: 4.99,
-          quantity: 40,
-          location: "Apple Orchard",
-          image: "/placeholder.svg?height=200&width=200",
-          farmerName: "Emily Davis",
-          farmerAvatar: "/placeholder.svg?height=40&width=40",
-          rating: 4.9,
-          dateAdded: "2024-01-12",
-        },
-        {
-          id: 5,
-          name: "Organic Milk",
-          category: "Dairy",
-          price: 6.99,
-          quantity: 15,
-          location: "Green Pastures",
-          image: "/placeholder.svg?height=200&width=200",
-          farmerName: "David Brown",
-          farmerAvatar: "/placeholder.svg?height=40&width=40",
-          rating: 4.6,
-          dateAdded: "2024-01-11",
-        },
-        {
-          id: 6,
-          name: "Brown Rice",
-          category: "Grains",
-          price: 8.99,
-          quantity: 25,
-          location: "Rice Fields",
-          image: "/placeholder.svg?height=200&width=200",
-          farmerName: "Linda Johnson",
-          farmerAvatar: "/placeholder.svg?height=40&width=40",
-          rating: 4.4,
-          dateAdded: "2024-01-10",
-        },
-        {
-          id: 7,
-          name: "Fresh Basil",
-          category: "Herbs",
-          price: 2.99,
-          quantity: 10,
-          location: "Herb Garden",
-          image: "/placeholder.svg?height=200&width=200",
-          farmerName: "Robert Smith",
-          farmerAvatar: "/placeholder.svg?height=40&width=40",
-          rating: 4.7,
-          dateAdded: "2024-01-09",
-        },
-        {
-          id: 8,
-          name: "Free Range Eggs",
-          category: "Dairy",
-          price: 5.99,
-          quantity: 20,
-          location: "Happy Hens Farm",
-          image: "/placeholder.svg?height=200&width=200",
-          farmerName: "Jessica White",
-          farmerAvatar: "/placeholder.svg?height=40&width=40",
-          rating: 4.8,
-          dateAdded: "2024-01-08",
-        },
-      ]
       setProducts(mockProducts)
       setFilteredProducts(mockProducts)
       setLoading(false)
-    }, 1500)
+    }, 800)
   }, [])
 
-  const handleFilterChange = (filters) => {
-    let filtered = [...products]
+  const applyFiltersAndSearch = (prods, query, filters) => {
+    let result = [...prods]
 
-    // Filter by category
-    if (filters.category) {
-      filtered = filtered.filter((product) => product.category === filters.category)
+    // Text search
+    if (query) {
+      const q = query.toLowerCase()
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.farmerName.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.location.toLowerCase().includes(q)
+      )
     }
 
-    // Filter by region
-    if (filters.region) {
-      filtered = filtered.filter((product) => product.location === filters.region)
+    if (filters) {
+      if (filters.category) result = result.filter((p) => p.category === filters.category)
+      if (filters.region)   result = result.filter((p) => p.location === filters.region)
+      if (filters.organic)  result = result.filter((p) => p.organic === true)
+      if (filters.minPrice) result = result.filter((p) => p.price >= Number(filters.minPrice))
+      if (filters.maxPrice) result = result.filter((p) => p.price <= Number(filters.maxPrice))
+
+      switch (filters.sortBy) {
+        case "price_low":  result.sort((a, b) => a.price - b.price); break
+        case "price_high": result.sort((a, b) => b.price - a.price); break
+        case "rating":     result.sort((a, b) => b.rating - a.rating); break
+        case "newest":
+        default:           result.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+      }
     }
 
-    // Filter by price range
-    if (filters.minPrice) {
-      filtered = filtered.filter((product) => product.price >= Number.parseFloat(filters.minPrice))
-    }
-    if (filters.maxPrice) {
-      filtered = filtered.filter((product) => product.price <= Number.parseFloat(filters.maxPrice))
-    }
-
-    // Sort products
-    switch (filters.sortBy) {
-      case "price_low":
-        filtered.sort((a, b) => a.price - b.price)
-        break
-      case "price_high":
-        filtered.sort((a, b) => b.price - a.price)
-        break
-      case "rating":
-        filtered.sort((a, b) => b.rating - a.rating)
-        break
-      case "newest":
-      default:
-        filtered.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
-        break
-    }
-
-    setFilteredProducts(filtered)
+    return result
   }
 
-  // Extract unique categories and regions for filters
-  const categories = [...new Set(products.map((product) => product.category))]
-  const regions = [...new Set(products.map((product) => product.location))]
+  const [activeFilters, setActiveFilters] = useState({})
+
+  const handleSearch = (e) => {
+    const q = e.target.value
+    setSearchQuery(q)
+    setFilteredProducts(applyFiltersAndSearch(products, q, activeFilters))
+  }
+
+  const handleFilterChange = (filters) => {
+    setActiveFilters(filters)
+    setFilteredProducts(applyFiltersAndSearch(products, searchQuery, filters))
+  }
+
+  const categories = [...new Set(mockProducts.map((p) => p.category))].sort()
+  const regions    = [...new Set(mockProducts.map((p) => p.location))].sort()
 
   if (loading) {
     return (
       <Layout>
-        <PageHeader title="Marketplace" description="Browse fresh produce directly from farmers" />
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <PageHeader title="Marketplace" description="Browse fresh produce directly from Indian farmers" />
+        <div className="max-w-7xl mx-auto py-12 sm:px-6 lg:px-8 flex justify-center">
           <LoadingSpinner />
         </div>
       </Layout>
@@ -187,38 +86,71 @@ const Marketplace = () => {
 
   return (
     <Layout>
-      <PageHeader title="Marketplace" description="Browse fresh produce directly from farmers" />
+      <PageHeader title="Marketplace" description="Browse fresh produce directly from Indian farmers" />
 
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {/* Search bar */}
+        <div className="mb-4 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearch}
+            placeholder="Search products, farmers, regions..."
+            className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => { setSearchQuery(""); setFilteredProducts(applyFiltersAndSearch(products, "", activeFilters)) }}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
         {/* Filters */}
         <ProductFilters onFilterChange={handleFilterChange} categories={categories} regions={regions} />
 
+        {/* Results count */}
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-gray-500">
+            Showing <span className="font-semibold text-gray-900">{filteredProducts.length}</span> of{" "}
+            <span className="font-semibold text-gray-900">{products.length}</span> products
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-xs font-medium px-2.5 py-1 rounded-full border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Live Stock
+            </span>
+          </div>
+        </div>
+
         {/* Product Grid */}
-        <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+        <div className="grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
 
         {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-500 text-sm max-w-md mx-auto">
+              Try adjusting your search term or filters. We have {products.length} products across{" "}
+              {categories.length} categories.
+            </p>
+            <button
+              onClick={() => { setSearchQuery(""); setActiveFilters({}); setFilteredProducts(products) }}
+              className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium text-sm"
             >
-              <path
-                vectorEffect="non-scaling-stroke"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
-              />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No products found</h3>
-            <p className="mt-1 text-sm text-gray-500">Try adjusting your filters to find what you're looking for.</p>
+              Clear all filters →
+            </button>
           </div>
         )}
       </div>
